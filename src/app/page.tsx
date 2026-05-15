@@ -159,10 +159,10 @@ export default function Home() {
             </div>
             <div className="space-y-3">
               {(notes.length > 0 ? notes.slice(0,4) : [
-                { title: 'Chapter 3: Motion & Time', link: '#', meta: 'Science • Class 10', size: '2.4 MB' },
-                { title: 'The Human Eye and Colourful World', link: '#', meta: 'Science • Class 10', size: '1.8 MB' },
-                { title: 'Linear Equations in Two Variables', link: '#', meta: 'Maths • Class 9', size: '1.6 MB' },
-                { title: 'Life Processes', link: '#', meta: 'Biology • Class 10', size: '2.1 MB' },
+                { title: 'Chapter 3: Motion & Time', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Science • Class 10', size: '2.4 MB' },
+                { title: 'The Human Eye and Colourful World', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Science • Class 10', size: '1.8 MB' },
+                { title: 'Linear Equations in Two Variables', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Maths • Class 9', size: '1.6 MB' },
+                { title: 'Life Processes', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Biology • Class 10', size: '2.1 MB' },
               ]).map((item: any, i) => (
                 <a key={i} href={item.link} target="_blank" className="flex items-center justify-between p-4 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-slate-800 transition group">
                   <div className="flex gap-3 items-center">
@@ -190,10 +190,10 @@ export default function Home() {
             </div>
             <div className="space-y-3">
               {(mockTests.length > 0 ? mockTests.slice(0,4) : [
-                { title: 'Maths Chapter 2 Test', meta: 'Class 10', qs: '20 Qs', time: '20 min' },
-                { title: 'Science Chapter 3 Test', meta: 'Class 10', qs: '25 Qs', time: '25 min' },
-                { title: 'English Grammar Test', meta: 'Class 9', qs: '15 Qs', time: '15 min' },
-                { title: 'Full Syllabus Test', meta: 'Class 10', qs: '50 Qs', time: '60 min' },
+                { title: 'Maths Chapter 2 Test', link: 'https://quizizz.com/join', meta: 'Class 10', qs: '20 Qs', time: '20 min' },
+                { title: 'Science Chapter 3 Test', link: 'https://quizizz.com/join', meta: 'Class 10', qs: '25 Qs', time: '25 min' },
+                { title: 'English Grammar Test', link: 'https://quizizz.com/join', meta: 'Class 9', qs: '15 Qs', time: '15 min' },
+                { title: 'Full Syllabus Test', link: 'https://quizizz.com/join', meta: 'Class 10', qs: '50 Qs', time: '60 min' },
               ]).map((item: any, i) => (
                 <a key={i} href={item.link} target="_blank" className="flex items-center justify-between p-4 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-slate-800 transition group">
                   <div className="flex gap-3 items-center">
@@ -213,31 +213,33 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Top Scorers */}
+          {/* Past Papers */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold">Top Scorers</h3>
+              <h3 className="text-lg font-bold">Past Papers</h3>
               <a href="#" className="text-xs font-bold text-indigo-400 hover:text-indigo-300">View All</a>
             </div>
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 space-y-4">
-              {[
-                { name: 'Ananya Sharma', class: 'Class 10', score: '98%', img: 1 },
-                { name: 'Arjun Verma', class: 'Class 10', score: '96%', img: 2 },
-                { name: 'Riya Patel', class: 'Class 9', score: '95%', img: 3 },
-                { name: 'Kabir Singh', class: 'Class 9', score: '94%', img: 4 },
-                { name: 'Meera Joshi', class: 'Class 9', score: '93%', img: 5 },
-              ].map((student, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-500 w-4 text-center">{i + 1}</span>
-                    <img src={`https://i.pravatar.cc/100?img=${student.img + 20}`} className="w-8 h-8 rounded-full object-cover border border-white/10" />
-                    <div>
-                      <h4 className="font-bold text-slate-200 text-sm leading-tight">{student.name}</h4>
-                      <p className="text-[10px] text-slate-400 font-medium">{student.class}</p>
+            <div className="space-y-3">
+              {(pastPapers.length > 0 ? pastPapers.slice(0,4) : [
+                { title: '2023 Board Final Exam', link: 'https://via.placeholder.com/800x1200.png?text=2023+Board+Exam+Paper', meta: 'Science • Class 10', type: 'IMAGE' },
+                { title: '2022 Half-Yearly Paper', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Maths • Class 10', type: 'PDF' },
+                { title: '2021 Previous Year Qs', link: 'https://via.placeholder.com/800x1200.png?text=2021+Previous+Year+Qs', meta: 'English • Class 9', type: 'IMAGE' },
+                { title: '2020 State Board Exam', link: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', meta: 'Biology • Class 10', type: 'PDF' },
+              ]).map((item: any, i) => (
+                <a key={i} href={item.link} target="_blank" className="flex items-center justify-between p-4 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-slate-800 transition group">
+                  <div className="flex gap-3 items-center">
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <h4 className="font-bold text-slate-200 text-sm group-hover:text-indigo-400 transition truncate">{item.title}</h4>
+                      <p className="text-xs text-slate-400 font-medium truncate">{item.meta || 'Past Paper'}</p>
                     </div>
                   </div>
-                  <span className="font-bold text-indigo-400">{student.score}</span>
-                </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded border ${item.type === 'PDF' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-green-400 bg-green-500/10 border-green-500/20'}`}>{item.type || 'FILE'}</span>
+                  </div>
+                </a>
               ))}
             </div>
           </div>
