@@ -1,10 +1,25 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Download, Search, ShieldAlert, GraduationCap, Video } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
+  const [materials, setMaterials] = useState<any[]>([]);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
+    fetch(`${apiUrl}/api/materials`)
+      .then(res => res.json())
+      .then(data => setMaterials(data))
+      .catch(() => {});
+  }, []);
+
+  const notes = materials.filter(m => m.category === 'notes');
+  const mockTests = materials.filter(m => m.category === 'mock-test');
+  const pastPapers = materials.filter(m => m.category === 'past-paper');
+
   return (
     <div className="min-h-screen relative overflow-hidden dark">
       {/* Background Elements */}
@@ -78,35 +93,84 @@ export default function Home() {
           </motion.form>
         </div>
 
-        {/* Subjects Grid */}
-        <div id="notes" className="mt-32">
-          <h2 className="text-3xl font-bold mb-10 text-center">Core Subjects</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { name: 'Physics', color: 'from-blue-500 to-cyan-500', icon: <Video /> },
-              { name: 'Chemistry', color: 'from-green-500 to-emerald-500', icon: <Video /> },
-              { name: 'Mathematics', color: 'from-purple-500 to-pink-500', icon: <Video /> },
-              { name: 'Biology', color: 'from-orange-500 to-red-500', icon: <Video /> },
-            ].map((subject, idx) => (
-              <motion.div 
-                key={subject.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="glass p-6 rounded-2xl hover:scale-105 transition-transform duration-300 cursor-pointer group"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${subject.color} flex items-center justify-center mb-4 group-hover:animate-float`}>
-                  <BookOpen className="text-white w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">{subject.name}</h3>
-                <p className="text-sm text-slate-400 mb-4">Complete syllabus notes & derivations.</p>
-                <button className="flex items-center gap-2 text-sm text-blue-400 font-medium group-hover:text-blue-300">
-                  <Download className="w-4 h-4" /> Download PDF
-                </button>
-              </motion.div>
-            ))}
-          </div>
+        {/* Dynamic Study Materials Grid */}
+        <div id="notes" className="mt-32 space-y-24">
+          
+          {/* Notes Section */}
+          <section>
+            <h2 className="text-3xl font-bold mb-10 text-center flex items-center justify-center gap-3">
+              <BookOpen className="text-blue-400" /> Study Notes
+            </h2>
+            {notes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {notes.map((mat, idx) => (
+                  <motion.div key={mat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }} className="glass p-6 rounded-2xl hover:scale-105 transition-transform duration-300 cursor-pointer group">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:animate-float">
+                      <BookOpen className="text-white w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{mat.title}</h3>
+                    <p className="text-sm text-slate-400 mb-4">Complete syllabus notes & derivations.</p>
+                    <a href={mat.link} target="_blank" className="flex items-center gap-2 text-sm text-blue-400 font-medium group-hover:text-blue-300">
+                      <Download className="w-4 h-4" /> Download PDF
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-slate-500 italic">No notes uploaded yet. Check back later!</p>
+            )}
+          </section>
+
+          {/* Past Papers Section */}
+          <section id="papers">
+            <h2 className="text-3xl font-bold mb-10 text-center flex items-center justify-center gap-3">
+              <BookOpen className="text-purple-400" /> Past Papers
+            </h2>
+            {pastPapers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastPapers.map((mat, idx) => (
+                  <motion.div key={mat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }} className="glass p-6 rounded-2xl hover:scale-105 transition-transform duration-300 cursor-pointer group">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4 group-hover:animate-float">
+                      <BookOpen className="text-white w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{mat.title}</h3>
+                    <p className="text-sm text-slate-400 mb-4">Previous year question papers with solutions.</p>
+                    <a href={mat.link} target="_blank" className="flex items-center gap-2 text-sm text-blue-400 font-medium group-hover:text-blue-300">
+                      <Download className="w-4 h-4" /> Download PDF
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-slate-500 italic">No past papers uploaded yet.</p>
+            )}
+          </section>
+
+          {/* Mock Tests Section */}
+          <section id="mock">
+            <h2 className="text-3xl font-bold mb-10 text-center flex items-center justify-center gap-3">
+              <BookOpen className="text-orange-400" /> Mock Tests
+            </h2>
+            {mockTests.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mockTests.map((mat, idx) => (
+                  <motion.div key={mat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }} className="glass p-6 rounded-2xl hover:scale-105 transition-transform duration-300 cursor-pointer group">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center mb-4 group-hover:animate-float">
+                      <BookOpen className="text-white w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{mat.title}</h3>
+                    <p className="text-sm text-slate-400 mb-4">Practice mock tests to check your preparation.</p>
+                    <a href={mat.link} target="_blank" className="flex items-center gap-2 text-sm text-blue-400 font-medium group-hover:text-blue-300">
+                      <Download className="w-4 h-4" /> Start Test
+                    </a>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-slate-500 italic">No mock tests available currently.</p>
+            )}
+          </section>
+
         </div>
 
       </main>

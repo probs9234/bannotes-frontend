@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Image as ImageIcon, Paperclip, Smile, LogOut, CheckCheck, Edit3, MessageSquare, Trash2, EyeOff, Pin, Pencil, X, Eye } from 'lucide-react';
+import { Send, Image as ImageIcon, Paperclip, Smile, LogOut, CheckCheck, Edit3, MessageSquare, Trash2, EyeOff, Pin, Pencil, X, Eye, BookOpen, Plus } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'whiteboard'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'whiteboard' | 'materials'>('chat');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +41,44 @@ export default function Dashboard() {
   const [pendingFile, setPendingFile] = useState<{ url: string, type: string, limit: number } | null>(null);
 
   const [fullscreenMedia, setFullscreenMedia] = useState<Message | null>(null);
+
+  const [materialTitle, setMaterialTitle] = useState('');
+  const [materialCategory, setMaterialCategory] = useState('notes');
+  const [materialLink, setMaterialLink] = useState('');
+  const [materialsList, setMaterialsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (activeTab === 'materials') {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
+      fetch(`${apiUrl}/api/materials`)
+        .then(res => res.json())
+        .then(data => setMaterialsList(data));
+    }
+  }, [activeTab]);
+
+  const handleAddMaterial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!materialTitle || !materialLink) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
+    const res = await fetch(`${apiUrl}/api/materials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: materialTitle, category: materialCategory, link: materialLink })
+    });
+    if (res.ok) {
+      const newMat = await res.json();
+      setMaterialsList([...materialsList, newMat]);
+      setMaterialTitle('');
+      setMaterialLink('');
+    }
+  };
+
+  const handleDeleteMaterial = async (id: string) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
+    await fetch(`${apiUrl}/api/materials/${id}`, { method: 'DELETE' });
+    setMaterialsList(materialsList.filter(m => m.id !== id));
+  };
+
 
   useEffect(() => {
     // Screenshot Protection
@@ -114,7 +152,7 @@ export default function Dashboard() {
     const partner = localStorage.getItem('partner') || '';
     const room = user.role === 'admin' ? 'admin-dashboard' : [user.username, partner].sort().join('-');
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
     
     fetch(`${apiUrl}/api/chat/messages?role=${user.role}&room=${room}`)
       .then(res => res.json())
@@ -166,7 +204,7 @@ export default function Dashboard() {
     if (activeTab === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     } else if (activeTab === 'whiteboard') {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://bannotes-backend.onrender.com';
       fetch(`${apiUrl}/api/chat/whiteboard`)
         .then(res => res.json())
         .then(data => data.forEach((line: any) => drawOnCanvas(line.x0, line.y0, line.x1, line.y1, line.color)));
@@ -382,6 +420,16 @@ export default function Dashboard() {
               <Edit3 className="w-4 h-4" /> Shared Whiteboard
             </div>
           </div>
+          {currentUser.role === 'admin' && (
+            <>
+              <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-8 mb-4 px-2">Admin Tools</h4>
+              <div className="space-y-1">
+                <div onClick={() => setActiveTab('materials')} className={`px-4 py-2.5 rounded-xl font-medium cursor-pointer transition flex items-center gap-2 ${activeTab === 'materials' ? 'bg-white/5 text-green-300 border-l-2 border-green-500' : 'hover:bg-white/5 text-slate-400'}`}>
+                  <BookOpen className="w-4 h-4" /> Manage Materials
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </aside>
 
@@ -389,7 +437,7 @@ export default function Dashboard() {
         <header className="h-20 border-b border-white/10 glass-dark flex items-center px-6 sticky top-0 z-10 justify-between">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              {activeTab === 'chat' ? (currentUser.role === 'admin' ? '# global-surveillance' : `# secure-${partnerName.toLowerCase()}`) : 'Shared Whiteboard'}
+              {activeTab === 'chat' ? (currentUser.role === 'admin' ? '# global-surveillance' : `# secure-${partnerName.toLowerCase()}`) : activeTab === 'whiteboard' ? 'Shared Whiteboard' : 'Manage Study Materials'}
               {currentUser.role === 'admin' && <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-300 border border-red-500/30 ml-2">OVERRIDE ACTIVE</span>}
             </h2>
             {activeTab === 'chat' && <p className="text-[10px] text-green-400 mt-1">🔒 Screenshot & Recording Protection Active</p>}
@@ -532,9 +580,55 @@ export default function Dashboard() {
               </form>
             </div>
           </>
-        ) : (
+        ) : activeTab === 'whiteboard' ? (
           <div className="flex-1 bg-[#1e293b] relative overflow-hidden flex items-center justify-center p-4">
             <canvas ref={canvasRef} width={800} height={600} className="bg-white rounded-xl shadow-2xl cursor-crosshair max-w-full" onMouseDown={onMouseDown} onMouseUp={onMouseUp} onMouseOut={onMouseUp} onMouseMove={onMouseMove} />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-8">
+            <div className="max-w-4xl mx-auto space-y-8">
+              <div className="glass p-6 rounded-2xl border border-white/10">
+                <h3 className="text-xl font-bold mb-4">Add New Material</h3>
+                <form onSubmit={handleAddMaterial} className="flex flex-col md:flex-row gap-4 items-end">
+                  <div className="flex-1 w-full space-y-1">
+                    <label className="text-xs text-slate-400 uppercase font-semibold">Title</label>
+                    <input type="text" value={materialTitle} onChange={e => setMaterialTitle(e.target.value)} placeholder="e.g. Class 12 Physics Notes" className="w-full bg-slate-900/50 border border-white/10 py-2.5 px-4 rounded-xl outline-none focus:border-blue-500 transition text-white" />
+                  </div>
+                  <div className="flex-1 w-full space-y-1">
+                    <label className="text-xs text-slate-400 uppercase font-semibold">Category</label>
+                    <select value={materialCategory} onChange={e => setMaterialCategory(e.target.value)} className="w-full bg-slate-900/50 border border-white/10 py-2.5 px-4 rounded-xl outline-none focus:border-blue-500 transition text-white appearance-none">
+                      <option value="notes">Study Notes</option>
+                      <option value="past-paper">Past Paper</option>
+                      <option value="mock-test">Mock Test</option>
+                    </select>
+                  </div>
+                  <div className="flex-1 w-full space-y-1">
+                    <label className="text-xs text-slate-400 uppercase font-semibold">PDF/Resource Link</label>
+                    <input type="url" value={materialLink} onChange={e => setMaterialLink(e.target.value)} placeholder="https://..." className="w-full bg-slate-900/50 border border-white/10 py-2.5 px-4 rounded-xl outline-none focus:border-blue-500 transition text-white" />
+                  </div>
+                  <button type="submit" className="py-2.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-2">
+                    <Plus className="w-4 h-4" /> Add
+                  </button>
+                </form>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold">Uploaded Materials ({materialsList.length})</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {materialsList.map(mat => (
+                    <div key={mat.id} className="glass p-4 rounded-xl border border-white/10 flex justify-between items-start group">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full mb-2 inline-block">{mat.category.replace('-', ' ')}</span>
+                        <h4 className="font-bold mb-1">{mat.title}</h4>
+                        <a href={mat.link} target="_blank" className="text-xs text-slate-400 hover:text-white truncate max-w-[200px] block">{mat.link}</a>
+                      </div>
+                      <button onClick={() => handleDeleteMaterial(mat.id)} className="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  {materialsList.length === 0 && <p className="text-slate-500 italic">No materials uploaded yet.</p>}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>
